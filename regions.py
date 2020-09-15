@@ -8,7 +8,7 @@ import sys
 def to_regions(img, p=100):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     n_seg = img.shape[0] * img.shape[1] // p
-    seg_slic = slic(img, n_segments=n_seg, start_label=0)
+    seg_slic = slic(img, n_segments=n_seg)
     return seg_slic
 
 def get_regions(img, regs, raw=True):

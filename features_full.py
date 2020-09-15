@@ -17,7 +17,7 @@ def create_binary_pattern(img, p, r):
     lbp = local_binary_pattern(img, p, r)
     return (lbp-np.min(lbp))/(np.max(lbp)-np.min(lbp)) * 255
 
-def get_features_labels(img, label, train=True):
+def get_features_labels(img, label, train=True, reshape=True):
     lbp_radius = 24 # local binary pattern neighbourhood
     h_neigh = 11 # haralick neighbourhood
     num_examples = 10000 # number of examples per image to use for training model
@@ -29,7 +29,10 @@ def get_features_labels(img, label, train=True):
     feature_img[:,:,:3] = img.dot(ohta.T)
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     feature_img[:,:,3] = create_binary_pattern(img_gray, lbp_points, lbp_radius)
-    features = feature_img.reshape(feature_img.shape[0]*feature_img.shape[1], feature_img.shape[2])
+    if reshape:
+        features = feature_img.reshape(feature_img.shape[0]*feature_img.shape[1], feature_img.shape[2])
+    else:
+        features = feature_img
     if train == True:
         ss_idx = subsample_idx(0, features.shape[0], num_examples)
         features = features[ss_idx]
