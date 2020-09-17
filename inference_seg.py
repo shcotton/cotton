@@ -7,6 +7,7 @@ import pickle as pkl
 import features as ft
 import features_full as ftf
 from skimage.measure import regionprops
+import time
 
 def check_args(args):
     if not os.path.exists(args.image):
@@ -23,11 +24,12 @@ def parse_args():
 
 def read_data(image):
     image = cv2.imread(image)
-    image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
+    # image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
     regions = ft.get_regions(image, 500)
     return image, regions
 
 def feature_and_infer(model, image, regions):
+    p = time.time()
     rs = regionprops(regions + 1)
     f, _ = ftf.get_features_labels(image, None, train=False, reshape=False)
     results = np.zeros(len(rs), dtype=np.uint8)
@@ -43,10 +45,12 @@ def feature_and_infer(model, image, regions):
         # print(X.shape)
         y = model.predict(X)
         t = np.count_nonzero(y)
-        if t / size > 0.3:
+        if t / size > 0.4:
             results[i] = 255
         else:
             results[i] = 0
+    p2 = time.time()
+    print(p2 - p)
     mask = results[regions]
     print(mask)
     return mask
