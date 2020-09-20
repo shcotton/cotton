@@ -9,8 +9,12 @@ ohta = np.array([
     [ -1/4, 1/2, -1/4 ]
 ])
 
-def subsample_idx(low, high, sample_size):
-    return np.random.randint(low, high, sample_size)
+def subsample_idx(sample_size, label):
+    white = sample_size // 3
+    black = sample_size - white
+    ws = np.random.choice(np.where(label > 0)[0], size=white, replace=False)
+    bs = np.random.choice(np.where(label == 0)[0], size=black, replace=False)
+    return np.hstack((ws, bs))
 
 # def create_binary_pattern(img, p, r):
 #     #print ('[INFO] Computing local binary pattern features.')
@@ -20,7 +24,7 @@ def subsample_idx(low, high, sample_size):
 def get_features_labels(img, label, train=True, reshape=True):
     num_examples = 10000 # number of examples per image to use for training model
 
-    feature_img = np.zeros((img.shape[0], img.shape[1], 4))
+    feature_img = np.zeros((img.shape[0], img.shape[1], 4), dtype=np.uint32)
     feature_img[:,:,:3] = img.dot(ohta.T)
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     feature_img[:,:,3] = local_binary_pattern(img_gray, 8, 2, method='nri_uniform')
@@ -29,7 +33,7 @@ def get_features_labels(img, label, train=True, reshape=True):
     else:
         features = feature_img
     if train == True:
-        ss_idx = subsample_idx(0, features.shape[0], num_examples)
+        ss_idx = subsample_idx(num_examples, label.ravel())
         features = features[ss_idx]
     else:
         ss_idx = []
