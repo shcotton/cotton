@@ -33,16 +33,18 @@ def feature_and_infer(model, image, regions):
     rs = regionprops(regions + 1)
     f, _ = ftf.get_features_labels(image, None, train=False, reshape=False)
     results = np.zeros(len(rs), dtype=np.uint8)
-    for i, r in enumerate(rs):
-        if r.area < 300:
-            results[i] = 0
+    e = enumerate(rs)
+    next(e)
+    for i, r in e:
+        if r.area < 400:
             continue
         coords = r.coords
         pop = len(coords)
-        if pop > 50:
-            choices = np.random.choice(pop, size=50, replace=False)
+        n = 50
+        if pop > n:
+            choices = np.random.choice(pop, size=n, replace=False)
             choices = coords[choices]
-            pop = 50
+            pop = n
         else:
             choices = coords
         # print(f.shape)

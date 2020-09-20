@@ -8,6 +8,7 @@ import sys
 
 class Region:
     def __init__(self, pts):
+        self.area = len(pts)
         self.mean = np.median(pts, axis=0)
         # self.cov = np.cov(pts, rowvar=False)
 
@@ -31,13 +32,15 @@ def get_graph(regs):
 
 def to_regions(img, p=100, raw=True):
     if raw:
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     n_seg = img.shape[0] * img.shape[1] // p
     regs = slic(img, n_segments=n_seg, min_size_factor=0.05)
     G = get_graph(regs)
     props = regionprops(regs + 1)
     n = len(props)
-    C = 0
+    C = 1
+
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
     rs = [Region(img[tuple(prop.coords.T)]) for prop in props]
 
     visit = np.zeros(n, dtype=bool)
@@ -46,6 +49,9 @@ def to_regions(img, p=100, raw=True):
         if visit[i]:
             continue
         visit[i] = True
+        if rs[i].area < 300:
+            lbl[i] = 0
+            continue
         nbs = G.neighbors(i)
         nbs = filter(lambda x: reg_nb(rs[i], rs[x]), nbs)
         nbs = list(nbs)
@@ -53,12 +59,18 @@ def to_regions(img, p=100, raw=True):
         j = 0
         while j < len(nbs):
             nb = nbs[j]
-            if not visit[nb]:
-                visit[nb] = True
-                lbl[nb] = C
-                nbs2 = G.neighbors(nb)
-                nbs2 = filter(lambda x: reg_nb(rs[nb], rs[x]), nbs2)
-                nbs.extend(nbs2)
+            if visit[nb]:
+                j += 1
+                continue
+            visit[nb] = True
+            if rs[nb].area < 300:
+                lbl[nb] = 0
+                j += 1
+                continue
+            lbl[nb] = C
+            nbs2 = G.neighbors(nb)
+            nbs2 = filter(lambda x: reg_nb(rs[nb], rs[x]), nbs2)
+            nbs.extend(nbs2)
             j += 1
         C += 1
     regs = lbl[regs]
@@ -85,6 +97,7 @@ def get_indices(regs):
 
 if __name__ == '__main__':
     img = cv2.imread(sys.argv[1])
+    # img = cv2.fastNlMeansDenoisingColored(img,None,10,10,7,21)
     imr = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     print('start')
     regs = to_regions(img, 800)
