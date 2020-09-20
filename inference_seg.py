@@ -25,7 +25,7 @@ def parse_args():
 def read_data(image):
     image = cv2.imread(image)
     # image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
-    regions = ft.get_regions(image, 500)
+    regions = ft.get_regions(image, 800)
     return image, regions
 
 def feature_and_infer(model, image, regions):
@@ -34,18 +34,24 @@ def feature_and_infer(model, image, regions):
     f, _ = ftf.get_features_labels(image, None, train=False, reshape=False)
     results = np.zeros(len(rs), dtype=np.uint8)
     for i, r in enumerate(rs):
+        if r.area < 300:
+            results[i] = 0
+            continue
         coords = r.coords
         pop = len(coords)
-        size = min(max(10, pop // 10), pop)
-        choices = np.random.choice(pop, size=size, replace=False)
-        choices = coords[choices]
+        if pop > 50:
+            choices = np.random.choice(pop, size=50, replace=False)
+            choices = coords[choices]
+            pop = 50
+        else:
+            choices = coords
         # print(f.shape)
         # print(choices.shape)
         X = f[tuple(choices.T)]
         # print(X.shape)
         y = model.predict(X)
         t = np.count_nonzero(y)
-        if t / size > 0.4:
+        if t / pop > 0.4:
             results[i] = 255
         else:
             results[i] = 0
