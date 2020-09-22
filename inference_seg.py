@@ -60,14 +60,16 @@ def feature_and_infer(model, image, regions):
     p2 = time.time()
     print(p2 - p)
     mask = results[regions]
-    print(mask)
     return mask
 
 def segment(image, model, raw=False):
     if raw:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     # image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
+    p = time.time()
     regions = rg.to_regions(image, REGION_AREA, REGION_IGN)
+    p2 = time.time()
+    print(p2-p)
     mask = feature_and_infer(model, image, regions)
     return mask
 
