@@ -32,7 +32,8 @@ def get_features_labels(img, label, raw=False, train=True, reshape=True):
     num_examples = 10000 # number of examples per image to use for training model
 
     feature_img = np.zeros((img.shape[0], img.shape[1], 4), dtype=np.uint32)
-    feature_img[:,:,:3] = img.dot(ohta.T)
+    # feature_img[:,:,:3] = img.dot(ohta.T)
+    feature_img[:,:,:3] = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     feature_img[:,:,3] = local_binary_pattern(img_gray, 8, 2, method='nri_uniform')
     if reshape:
