@@ -30,7 +30,7 @@ def get_graph(regs):
     G.add_edges_from(x)
     return G
 
-def to_regions(img, p=100, raw=True):
+def to_regions(img, p=100, raw=False, ig=300):
     if raw:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     n_seg = img.shape[0] * img.shape[1] // p
@@ -49,7 +49,7 @@ def to_regions(img, p=100, raw=True):
         if visit[i]:
             continue
         visit[i] = True
-        if rs[i].area < 300:
+        if rs[i].area < ig:
             lbl[i] = 0
             continue
         nbs = G.neighbors(i)
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     # img = cv2.fastNlMeansDenoisingColored(img,None,10,10,7,21)
     imr = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     print('start')
-    regs = to_regions(img, 800)
+    regs = to_regions(img, 800, raw=True)
     print('end')
     bb = mark_boundaries(imr, regs)
     cv2.imwrite('../x.jpg', (bb*255).astype(int))

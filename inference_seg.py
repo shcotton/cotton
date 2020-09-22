@@ -4,10 +4,16 @@ from glob import glob
 import argparse
 import os
 import pickle as pkl
-import features as ft
-import features_full as ftf
+import features_full as ft
+import regions as rg
 from skimage.measure import regionprops
 import time
+
+REGION_AREA = 800
+REGION_IGN = 300
+INFER_IGN = 400
+RAND_SIZE = 30
+RATIO = 0.4
 
 def check_args(args):
     if not os.path.exists(args.image):
@@ -22,25 +28,19 @@ def parse_args():
     args = parser.parse_args()
     return check_args(args)
 
-def read_data(image):
-    image = cv2.imread(image)
-    # image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
-    regions = ft.get_regions(image, 800)
-    return image, regions
-
 def feature_and_infer(model, image, regions):
     p = time.time()
     rs = regionprops(regions + 1)
-    f, _ = ftf.get_features_labels(image, None, train=False, reshape=False)
+    f, _ = ft.get_features_labels(image, None, train=False, reshape=False)
     results = np.zeros(len(rs), dtype=np.uint8)
     e = enumerate(rs)
     next(e)
     for i, r in e:
-        if r.area < 400:
+        if r.area < INFER_IGN:
             continue
         coords = r.coords
         pop = len(coords)
-        n = 50
+        n = RAND_SIZE
         if pop > n:
             choices = np.random.choice(pop, size=n, replace=False)
             choices = coords[choices]
@@ -53,7 +53,7 @@ def feature_and_infer(model, image, regions):
         # print(X.shape)
         y = model.predict(X)
         t = np.count_nonzero(y)
-        if t / pop > 0.4:
+        if t / pop > RATIO:
             results[i] = 255
         else:
             results[i] = 0
@@ -63,18 +63,20 @@ def feature_and_infer(model, image, regions):
     print(mask)
     return mask
 
-def write_data(output, mask):
-    cv2.imwrite(output, mask)
-
-def main(image, model, output):
-    image, regions = read_data(image)
-    model = pkl.load(open(model, "rb"))
+def segment(image, model, raw=False):
+    if raw:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
+    regions = rg.to_regions(image, REGION_AREA, REGION_IGN)
     mask = feature_and_infer(model, image, regions)
-    write_data(output, mask)
+    return mask
 
 if __name__ == '__main__':
     args = parse_args()
     image = args.image
     model = args.model
     output = args.output
-    main(image, model, output)
+    image = cv2.imread(image)
+    model = pkl.load(open(model, "rb"))
+    mask = segment(image, model, raw=True)
+    cv2.imwrite(output, mask)

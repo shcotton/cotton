@@ -2,12 +2,16 @@ import numpy as np
 import cv2
 from skimage.feature import local_binary_pattern
 import sys
+import regions as rg
 
 ohta = np.array([
     [ 1/3, 1/3, 1/3 ],
-    [ -1/2, 0., 1/2 ],
+    [ 1/2, 0., -1/2 ],
     [ -1/4, 1/2, -1/4 ]
 ])
+
+def get_regions(img, p=100):
+    return rg.to_regions(img, p)
 
 def subsample_idx(sample_size, label):
     white = sample_size // 3
@@ -21,12 +25,15 @@ def subsample_idx(sample_size, label):
 #     lbp = local_binary_pattern(img, p, r)
 #     return (lbp-np.min(lbp))/(np.max(lbp)-np.min(lbp)) * 255
 
-def get_features_labels(img, label, train=True, reshape=True):
+def get_features_labels(img, label, raw=False, train=True, reshape=True):
+    if raw:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
     num_examples = 10000 # number of examples per image to use for training model
 
     feature_img = np.zeros((img.shape[0], img.shape[1], 4), dtype=np.uint32)
     feature_img[:,:,:3] = img.dot(ohta.T)
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     feature_img[:,:,3] = local_binary_pattern(img_gray, 8, 2, method='nri_uniform')
     if reshape:
         features = feature_img.reshape(feature_img.shape[0]*feature_img.shape[1], feature_img.shape[2])
