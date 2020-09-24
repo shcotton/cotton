@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+from skimage.io import imsave
 from skimage.measure import regionprops
 from skimage.segmentation import slic, mark_boundaries
 import networkx as nx
@@ -35,9 +36,11 @@ def to_regions(img, p=100, raw=False, ig=300):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     n_seg = img.shape[0] * img.shape[1] // p
     regs = slic(img, n_segments=n_seg, min_size_factor=0.05)
+    # return regs
     G = get_graph(regs)
     props = regionprops(regs + 1)
     n = len(props)
+    print(n)
     C = 1
 
     img = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
@@ -100,9 +103,11 @@ if __name__ == '__main__':
     # img = cv2.fastNlMeansDenoisingColored(img,None,10,10,7,21)
     imr = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     print('start')
-    regs = to_regions(img, 800, raw=True)
+    regs = to_regions(imr, 800, raw=True)
     print('end')
     bb = mark_boundaries(imr, regs)
-    cv2.imwrite('../x.jpg', (bb*255).astype(int))
-    plt.imshow(bb)
-    plt.show()
+    # bb = (bb*255).astype(np.uint8)
+    # bb = cv2.cvtColor(bb, cv2.COLOR_RGB2BGR)
+    imsave('./x.jpg', bb)
+    # plt.imshow(bb)
+    # plt.show()
