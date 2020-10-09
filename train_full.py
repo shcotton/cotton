@@ -33,8 +33,11 @@ def read_data(image_dir, label_dir):
     label_list = []
 
     for image_file, label_file in zip(image_files, label_files):
-        image_list.append((image_file, cv2.imread(image_file, 1)))
-        label_list.append((label_file, cv2.imread(label_file, 0)))
+        img = cv2.imread(image_file)
+        lbl = cv2.imread(label_file, 0)
+        lbl = np.where(lbl < 128, 0, 255).astype(np.uint8)
+        image_list.append((image_file, img))
+        label_list.append((label_file, lbl))
 
     return image_list, label_list
 
@@ -71,7 +74,7 @@ def train_model(X, y, classifier="RF"):
     elif classifier == "RF":
         from sklearn.ensemble import RandomForestClassifier
         print ('[INFO] Training Random Forest model.')
-        model = RandomForestClassifier(n_estimators=250, max_depth=12, random_state=42)
+        model = RandomForestClassifier(n_estimators=200, max_depth=12, random_state=42)
         model.fit(X, y)
     elif classifier == "GBC":
         from sklearn.ensemble import GradientBoostingClassifier

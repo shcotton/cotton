@@ -13,7 +13,7 @@ REGION_AREA = 800
 REGION_IGN = 300
 INFER_IGN = 400
 RAND_SIZE = 30
-RATIO = 0.5
+RATIO = 0.7
 
 def check_args(args):
     if not os.path.exists(args.image):
