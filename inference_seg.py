@@ -9,11 +9,11 @@ import regions as rg
 from skimage.measure import regionprops
 import time
 
-REGION_AREA = 800
-REGION_IGN = 300
-INFER_IGN = 400
+REGION_AREA = 400
+REGION_IGN = 100
+INFER_IGN = 100
 RAND_SIZE = 30
-RATIO = 0.7
+RATIO = 0.5
 
 def check_args(args):
     if not os.path.exists(args.image):
@@ -72,6 +72,18 @@ def segment(image, model, raw=False):
     print(p2-p)
     mask = feature_and_infer(model, image, regions)
     return mask
+
+# https://stackoverflow.com/questions/50450654/filling-in-circles-in-opencv
+def fill(mask):
+    ret, thresh = cv2.threshold(mask, 200, 255, cv2.THRESH_BINARY)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    cv2.drawContours(mask, contours, -1, (255,255,255), thickness=-1)
+
+def get_regions(mask):
+    ret, thresh = cv2.threshold(mask, 200, 255, cv2.THRESH_BINARY)
+    n, labels = cv2.connectedComponents(thresh)
+    regions = regionprops(labels)
+    return [r.coords for r in regions]
 
 if __name__ == '__main__':
     args = parse_args()
