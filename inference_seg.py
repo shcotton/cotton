@@ -74,14 +74,12 @@ def segment(image, model, raw=False):
     return mask
 
 # https://stackoverflow.com/questions/50450654/filling-in-circles-in-opencv
-def fill(mask):
-    ret, thresh = cv2.threshold(mask, 200, 255, cv2.THRESH_BINARY)
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+def fill(mask, raw=False):
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     cv2.drawContours(mask, contours, -1, (255,255,255), thickness=-1)
 
-def get_regions(mask):
-    ret, thresh = cv2.threshold(mask, 200, 255, cv2.THRESH_BINARY)
-    n, labels = cv2.connectedComponents(thresh)
+def get_regions(mask, raw=False):
+    n, labels = cv2.connectedComponents(mask)
     regions = regionprops(labels)
     return [r.coords for r in regions]
 
