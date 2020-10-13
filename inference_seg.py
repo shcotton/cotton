@@ -74,11 +74,11 @@ def segment(image, model, raw=False):
     return mask
 
 # https://stackoverflow.com/questions/50450654/filling-in-circles-in-opencv
-def fill(mask, raw=False):
+def fill(mask):
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    cv2.drawContours(mask, contours, -1, (255,255,255), thickness=-1)
+    cv2.drawContours(mask, contours, -1, 255, thickness=-1)
 
-def get_regions(mask, raw=False):
+def get_regions(mask):
     n, labels = cv2.connectedComponents(mask)
     regions = regionprops(labels)
     return [r.coords for r in regions]
@@ -89,6 +89,11 @@ if __name__ == '__main__':
     model = args.model
     output = args.output
     image = cv2.imread(image)
+    # image = cv2.imread('cot3_out.jpg', 0)
+    # _, image = cv2.threshold(image, 200, 255, cv2.THRESH_BINARY)
+    # fill(image)
+    # print(get_regions(image))
+    # exit()
     model = pkl.load(open(model, "rb"))
     mask = segment(image, model, raw=True)
     cv2.imwrite(output, mask)
