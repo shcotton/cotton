@@ -18,7 +18,7 @@ def reg_nb(X, Y):
     # b = np.trace(X.cov) + np.trace(Y.cov)
     # c = np.sum(np.sqrt(np.linalg.eig(np.dot(X.cov, Y.cov))[0]))
     # return a + b - 2 * c < 200
-    return a < 90
+    return a < 80
 
 def get_graph(regs):
     vs_right = np.vstack([regs[:,:-1].ravel(), regs[:,1:].ravel()])

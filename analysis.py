@@ -19,12 +19,8 @@ img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(float)+1
 img2 = img.reshape(-1, 3)
 img2 = np.apply_along_axis(f, 1, img2)
 lbl2 = lbl.reshape(-1)
-print(img2)
-
-print(np.count_nonzero(lbl2) / len(lbl2))
-exit()
 x,y,z = img2[:,0], img2[:,1], img2[:,2]
-c = np.random.choice(img2.shape[0], size=1000, replace=False)
+c = np.random.choice(img2.shape[0], size=10000, replace=False)
 x,y,z = x[c], y[c], z[c]
 lbl2 = lbl2[c]
 

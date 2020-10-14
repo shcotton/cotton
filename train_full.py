@@ -52,6 +52,7 @@ def create_training_dataset(image_list, label_list):
         label_file, label = label
         image_name = os.path.basename(image_file)
         print(f'Now on {image_name}')
+        image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
         features, labels = ft.get_features_labels(image, label, raw=True)
         X.append(features)
         y.append(labels)
