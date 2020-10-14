@@ -73,6 +73,10 @@ def segment(image, model, raw=False):
     mask = feature_and_infer(model, image, regions)
     return mask
 
+def segment_main(image, raw=False):
+    model = pkl.load(open("model.p", "rb"))
+    return segment(image, model, raw=False)
+
 # https://stackoverflow.com/questions/50450654/filling-in-circles-in-opencv
 def fill(mask):
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)

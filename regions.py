@@ -66,7 +66,7 @@ def to_regions(img, p=100, raw=False, ig=300):
                 j += 1
                 continue
             visit[nb] = True
-            if rs[nb].area < 300:
+            if rs[nb].area < ig:
                 lbl[nb] = 0
                 j += 1
                 continue
