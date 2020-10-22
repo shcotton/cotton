@@ -12,7 +12,7 @@ import time
 REGION_AREA = 800
 REGION_IGN = 100
 INFER_IGN = 100
-RAND_SIZE = 50
+RAND_SIZE = 100
 RATIO = 0.5
 
 def check_args(args):
